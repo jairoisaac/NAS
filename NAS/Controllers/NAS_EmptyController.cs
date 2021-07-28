@@ -2,147 +2,122 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NAS.Data;
 using NAS.Data.Entities;
+using NAS.ViewModels;
 
 namespace NAS.Controllers
 {
-    public class NAS_EmptyController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class NAS_EmptyController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMapper mapper;
+        private readonly ILogger<NAS_EmptyController> _logger;
 
-        public NAS_EmptyController(ApplicationDbContext context)
+
+        public NAS_EmptyController(ApplicationDbContext context,IMapper mapper, ILogger<NAS_EmptyController> logger)
         {
+            _logger = logger;
             _context = context;
+            this.mapper = mapper;
         }
 
-        // GET: NAS_Empty
-        public async Task<IActionResult> Index()
+        // GET: api/NAS_Empty
+        //[HttpGet]
+
+        //public async Task<ActionResult<IEnumerable<NAS_Empty>>> GetNASEmptys()
+        //{
+        //    return await _context.NASEmptys.ToListAsync();
+        //}
+        // GET: api/NAS_Empty
+        [HttpGet]
+
+        public async Task<ActionResult<IEnumerable<NAS_Price>>> GetNASEmptys()
         {
-            return View(await _context.NASEmptys.ToListAsync());
+            //var result = 
+            //return await _context.NASEmptys.ToListAsync();
+            return await _context.NASEmptys.Select(n => new NAS_Price { Cost = n.Cost, Id = n.Id, SKU = n.SKU }).ToListAsync();
         }
 
-        // GET: NAS_Empty/Details/5
-        public async Task<IActionResult> Details(int? id)
+        // GET: api/NAS_Empty/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<NAS_Empty>> GetNAS_Empty(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var nAS_Empty = await _context.NASEmptys
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (nAS_Empty == null)
-            {
-                return NotFound();
-            }
-
-            return View(nAS_Empty);
-        }
-
-        // GET: NAS_Empty/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: NAS_Empty/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Manufacturer,SKU,Description,Cost")] NAS_Empty nAS_Empty)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(nAS_Empty);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(nAS_Empty);
-        }
-
-        // GET: NAS_Empty/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var nAS_Empty = await _context.NASEmptys.FindAsync(id);
+
             if (nAS_Empty == null)
             {
                 return NotFound();
             }
-            return View(nAS_Empty);
+
+            return nAS_Empty;
         }
 
-        // POST: NAS_Empty/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Manufacturer,SKU,Description,Cost")] NAS_Empty nAS_Empty)
+        // PUT: api/NAS_Empty/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutNAS_Empty(int id, NAS_Empty nAS_Empty)
         {
             if (id != nAS_Empty.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(nAS_Empty).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(nAS_Empty);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!NAS_EmptyExists(nAS_Empty.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            return View(nAS_Empty);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!NAS_EmptyExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: NAS_Empty/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: api/NAS_Empty
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPost]
+        public async Task<ActionResult<NAS_Empty>> PostNAS_Empty(NAS_Empty nAS_Empty)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            _context.NASEmptys.Add(nAS_Empty);
+            await _context.SaveChangesAsync();
 
-            var nAS_Empty = await _context.NASEmptys
-                .FirstOrDefaultAsync(m => m.Id == id);
+            return CreatedAtAction("GetNAS_Empty", new { id = nAS_Empty.Id }, nAS_Empty);
+        }
+
+        // DELETE: api/NAS_Empty/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<NAS_Empty>> DeleteNAS_Empty(int id)
+        {
+            var nAS_Empty = await _context.NASEmptys.FindAsync(id);
             if (nAS_Empty == null)
             {
                 return NotFound();
             }
 
-            return View(nAS_Empty);
-        }
-
-        // POST: NAS_Empty/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var nAS_Empty = await _context.NASEmptys.FindAsync(id);
             _context.NASEmptys.Remove(nAS_Empty);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return nAS_Empty;
         }
 
         private bool NAS_EmptyExists(int id)

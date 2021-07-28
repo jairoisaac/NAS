@@ -2,147 +2,115 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NAS.Data;
 using NAS.Data.Entities;
+using NAS.ViewModels;
 
 namespace NAS.Controllers
 {
-    public class HardDrivesController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class HardDrivesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
-        public HardDrivesController(ApplicationDbContext context)
+        private readonly ILogger<HardDrivesController> _logger;
+        public HardDrivesController(ApplicationDbContext context, ILogger<HardDrivesController> logger)
         {
+            _logger = logger;
+
             _context = context;
         }
 
-        // GET: HardDrives
-        public async Task<IActionResult> Index()
+        // GET: api/HardDrives
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<HardDrive>>> GetHardDrives()
+        //{
+        //    return await _context.HardDrives.ToListAsync();
+        //}
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<HD_Price>>> GetHardDrives()
         {
-            return View(await _context.HardDrives.ToListAsync());
+            return await _context.HardDrives.Select(h => new HD_Price {Id=h.Id,SKU = h.SKU,Cost = h.Cost, Amount = 1}).ToListAsync();
         }
 
-        // GET: HardDrives/Details/5
-        public async Task<IActionResult> Details(int? id)
+
+        // GET: api/HardDrives/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<HardDrive>> GetHardDrive(int id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var hardDrive = await _context.HardDrives
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (hardDrive == null)
-            {
-                return NotFound();
-            }
-
-            return View(hardDrive);
-        }
-
-        // GET: HardDrives/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: HardDrives/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Manufacturer,SKU,Description,Cost")] HardDrive hardDrive)
-        {
-            if (ModelState.IsValid)
-            {
-                _context.Add(hardDrive);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(hardDrive);
-        }
-
-        // GET: HardDrives/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
             var hardDrive = await _context.HardDrives.FindAsync(id);
+
             if (hardDrive == null)
             {
                 return NotFound();
             }
-            return View(hardDrive);
+
+            return hardDrive;
         }
 
-        // POST: HardDrives/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Manufacturer,SKU,Description,Cost")] HardDrive hardDrive)
+        // PUT: api/HardDrives/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutHardDrive(int id, HardDrive hardDrive)
         {
             if (id != hardDrive.Id)
             {
-                return NotFound();
+                return BadRequest();
             }
 
-            if (ModelState.IsValid)
+            _context.Entry(hardDrive).State = EntityState.Modified;
+
+            try
             {
-                try
-                {
-                    _context.Update(hardDrive);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!HardDriveExists(hardDrive.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
             }
-            return View(hardDrive);
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!HardDriveExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
 
-        // GET: HardDrives/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        // POST: api/HardDrives
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for
+        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
+        [HttpPost]
+        public async Task<ActionResult<HardDrive>> PostHardDrive(HardDrive hardDrive)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            _context.HardDrives.Add(hardDrive);
+            await _context.SaveChangesAsync();
 
-            var hardDrive = await _context.HardDrives
-                .FirstOrDefaultAsync(m => m.Id == id);
+            return CreatedAtAction("GetHardDrive", new { id = hardDrive.Id }, hardDrive);
+        }
+
+        // DELETE: api/HardDrives/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<HardDrive>> DeleteHardDrive(int id)
+        {
+            var hardDrive = await _context.HardDrives.FindAsync(id);
             if (hardDrive == null)
             {
                 return NotFound();
             }
 
-            return View(hardDrive);
-        }
-
-        // POST: HardDrives/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var hardDrive = await _context.HardDrives.FindAsync(id);
             _context.HardDrives.Remove(hardDrive);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return hardDrive;
         }
 
         private bool HardDriveExists(int id)

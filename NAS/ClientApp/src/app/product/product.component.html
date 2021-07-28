@@ -1,0 +1,31 @@
+<p>{{data.nas.sku}} / {{data.nas.cost}}</p>
+<div class="row">
+  <!--<div class="product-info col-md-4" *ngFor='let prod of product,let i = index'>-->
+
+  <div class="product-info col-md-4" *ngFor='let prod of data.hdsPrice'>
+    <div class="card card-body bg-light p-1 m-1">
+      <ul class="product-name list-unstyled">
+        <li><strong>SKU</strong>: {{ prod.sku }}</li>
+        <li><strong>Price</strong>: {{ prod.cost | currency:"USD":true }}</li>
+        <li><strong>Amount</strong>: {{ prod.amount }}</li>
+        <li><strong>Sub Total</strong>: {{ prod.amount * prod.cost }}</li>
+      </ul>
+      <div class="row">
+        <div class="col-md-4">
+          <input type="button" (click)="itemToDecrese(prod)" value=" - " />
+        </div>
+        <div class="col-md-4">
+          <input type="button" (click)="itemToIncrease(prod)" value=" + " />
+        </div>
+        <!--<div class="col-md-4">
+          <input type="button" (click)="ItemToDelete(prod)" value=" X " />
+        </div>-->
+      </div>
+    </div>
+  </div>
+  <p>{{errorMessage}}</p>
+</div>
+<button id="buyButton" class="btn btn-success" (click)="totalPrice()">Get Price</button>
+<app-totl-price></app-totl-price>
+
+

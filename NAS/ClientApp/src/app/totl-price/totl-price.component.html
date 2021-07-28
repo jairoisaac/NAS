@@ -1,0 +1,30 @@
+<p>totl-price works!</p>
+<p>{{data.nas.sku}} / {{data.nas.cost}}</p>
+<div class="row">
+  <div class="product-info col-md-4" *ngFor='let prod of data.hdsPrice'>
+    <div class="card card-body bg-light p-1 m-1">
+      <ul class="product-name list-unstyled">
+        <li><strong>SKU</strong>: {{ prod.sku }}</li>
+        <li><strong>Price</strong>: {{ prod.cost | currency:"USD":true }}</li>
+        <li><strong>Amount</strong>: {{ prod.amount }}</li>
+        <li><strong>Sub Total</strong>: {{ prod.amount * prod.cost }}</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="card card-body bg-light p-1 m-1">
+  <ul class="product-name list-unstyled">
+    <li><strong>SKU</strong>: {{ totalPrice.sku }}</li>
+    <li><strong>Indward Shiping</strong>: {{ totalPrice.basic1 | currency:"USD":true }}</li>
+    <li><strong>Outward Shiping</strong>: {{ totalPrice.basic2 | currency:"USD":true  }}</li>
+    <li><strong>Sub Total Cost</strong>: {{ totalPrice.subTotalCost | currency:"USD":true  }}</li>
+    <li><strong>Configuration & Handling Cost</strong>: {{ totalPrice.basic3 | currency:"USD":true  }}</li>
+    <li><strong>Grand Total Cost</strong>: {{ totalPrice.grandTotalCost | currency:"USD":true  }}</li>
+    <li><strong>Hard Disk Configuration</strong>: {{ totalPrice.hardDiskConfiguration | currency:"USD":true  }}</li>
+    <li><strong>Sub Cost</strong>: {{ totalPrice.subCost | currency:"USD":true  }}</li>
+    <li><strong>Uplift Margin - Sales Margin</strong>: {{ totalPrice.salesMargin | currency:"USD":true  }}</li>
+    <li><strong>Credit Card Commission 4%</strong>: {{ totalPrice.creditCardCommission | currency:"USD":true  }}</li>
+    <li><strong>Grand Total</strong>: {{ totalPrice.grandTotal | currency:"USD":true }}</li>
+  </ul>
+</div>
+
